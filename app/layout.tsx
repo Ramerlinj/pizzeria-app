@@ -1,6 +1,21 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Oswald } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
+import Header from "@/components/header/Header";
+
+const oswald = Oswald({
+  variable: "--font-oswald",
+  subsets: ["latin"],
+  weight: ["200", "300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const bbh = localFont({
+  src: "./fonts/bbh-bogle.woff2",
+  variable: "--font-bbh",
+  display: "swap",
+});
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,8 +36,9 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body
-        className={`${inter.variable} antialiased`}
+        className={`${inter.variable} ${oswald.variable} ${bbh.variable} antialiased`}
       >
+        <Header />
         {children}
       </body>
     </html>

@@ -31,14 +31,14 @@ const StarRating = ({ rating }: { rating: number }) => {
 
 const PizzaCard = ({ pizza }: { pizza: PizzaHome }) => {
   return (
-    <div className="flex flex-col items-center">
+    <div className="group flex flex-col items-center  hover:bg-white p-4 transition-colors rounded-lg shadow-lg relative z-10">
 
       <div className="relative w-48 h-48 mb-4">
         <Image
           src={pizza.imageUrl}
           alt={pizza.name}
           fill
-          className="object-contain drop-shadow-xl hover:scale-105 transition-transform duration-300 hover:rotate-90 cursor-pointer hover:-translate-y-1"
+          className="object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-400 group-hover:rotate-90 cursor-pointer group-hover:-translate-y-1"
         />
       </div>
 
@@ -65,14 +65,14 @@ const PizzaCard = ({ pizza }: { pizza: PizzaHome }) => {
 export const PopularPizza = () => {
   return (
     <section className="relative mb-32">
-      <div className="bg-pizza-crema pt-20 pb-32 relative overflow-hidden">
+      <div className="bg-pizza-crema pt-20 pb-44 relative overflow-hidden">
         <div className="flex items-center justify-center gap-4 mb-12">
           <span className="font-oswald text-red-600 text-xl tracking-wider">
             OUR SIGNATURE
           </span>
           <div className="w-px h-8 bg-red-800"></div>
           <h2 className="font-bbh text-pizza-texto text-4xl md:text-5xl tracking-wide">
-            POPULAR PIZZA
+              PIZZA POPULARES
           </h2>
         </div>
 

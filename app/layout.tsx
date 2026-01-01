@@ -3,6 +3,7 @@ import { Inter, Oswald } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/header/Header";
+import Footer from "@/components/footer/Footer";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -40,6 +41,7 @@ export default function RootLayout({
       >
         <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );

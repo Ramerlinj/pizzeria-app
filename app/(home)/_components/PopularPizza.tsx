@@ -31,30 +31,29 @@ const StarRating = ({ rating }: { rating: number }) => {
 
 const PizzaCard = ({ pizza }: { pizza: PizzaHome }) => {
   return (
-    <div className="flex flex-col items-center">
-
-      <div className="relative w-48 h-48 mb-4">
+    <div className="group flex flex-col items-center hover:bg-white p-3 md:p-4 transition-colors rounded-lg shadow-lg relative z-10 w-full max-w-xs">
+      <div className="relative w-36 h-36 md:w-48 md:h-48 mb-4">
         <Image
           src={pizza.imageUrl}
           alt={pizza.name}
           fill
-          className="object-contain drop-shadow-xl hover:scale-105 transition-transform duration-300 hover:rotate-90 cursor-pointer hover:-translate-y-1"
+          className="object-contain drop-shadow-xl group-hover:scale-105 transition-transform duration-400 group-hover:rotate-90 cursor-pointer group-hover:-translate-y-1"
         />
       </div>
 
       <StarRating rating={pizza.stars} />
 
-      <h3 className="font-bbh text-pizza-texto text-sm mt-3 tracking-wide text-center">
+      <h3 className="font-bbh text-pizza-texto text-xs md:text-sm mt-3 tracking-wide text-center">
         {pizza.name}
       </h3>
 
       <div className="flex items-center gap-2 mt-1">
         {pizza.priceBeforeDiscount && (
-          <span className="text-red-600 line-through text-sm">
+          <span className="text-red-600 line-through text-xs md:text-sm">
             ${pizza.priceBeforeDiscount.toFixed(2)}
           </span>
         )}
-        <span className="text-pizza-texto font-bold text-lg">
+        <span className="text-pizza-texto font-bold text-base md:text-lg">
           ${pizza.price.toFixed(2)}
         </span>
       </div>
@@ -64,20 +63,20 @@ const PizzaCard = ({ pizza }: { pizza: PizzaHome }) => {
 
 export const PopularPizza = () => {
   return (
-    <section className="relative mb-32">
-      <div className="bg-pizza-crema pt-20 pb-32 relative overflow-hidden">
-        <div className="flex items-center justify-center gap-4 mb-12">
-          <span className="font-oswald text-red-600 text-xl tracking-wider">
+    <section className="relative mb-20 md:mb-32">
+      <div className="bg-pizza-crema pt-12 md:pt-20 pb-32 md:pb-44 relative overflow-hidden">
+        <div className="flex flex-col md:flex-row items-center justify-center gap-2 md:gap-4 mb-8 md:mb-12 px-4">
+          <span className="font-oswald text-red-600 text-base md:text-xl tracking-wider">
             OUR SIGNATURE
           </span>
-          <div className="w-px h-8 bg-red-800"></div>
-          <h2 className="font-bbh text-pizza-texto text-4xl md:text-5xl tracking-wide">
-            POPULAR PIZZA
+          <div className="w-8 h-px md:w-px md:h-8 bg-red-800"></div>
+          <h2 className="font-bbh text-pizza-texto text-2xl md:text-4xl lg:text-5xl tracking-wide text-center">
+            PIZZA POPULARES
           </h2>
         </div>
 
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 justify-items-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 justify-items-center">
             {pizzasHome.map((pizza) => (
               <PizzaCard key={pizza.id} pizza={pizza} />
             ))}
@@ -85,18 +84,18 @@ export const PopularPizza = () => {
         </div>
 
         <div className="absolute -bottom-1/5 left-1/2 -translate-x-1/2 pointer-events-none">
-          <span className="font-bbh text-3xl md:text-[18rem] text-huerto-verde/40 leading-none tracking-[0.2em] whitespace-nowrap">
+          <span className="font-bbh text-5xl md:text-9xl lg:text-[18rem] text-huerto-verde/40 leading-none tracking-[0.2em] whitespace-nowrap">
             Delicia
           </span>
         </div>
       </div>
 
       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 z-20">
-        <div className="bg-pizza-texto rounded-full w-32 h-32 flex flex-col items-center justify-center cursor-pointer hover:bg-pizza-texto/90 transition-colors shadow-2xl">
-          <span className="font-bbh text-white text-base tracking-wide">
+        <div className="bg-pizza-texto rounded-full w-24 h-24 md:w-32 md:h-32 flex flex-col items-center justify-center cursor-pointer hover:bg-pizza-texto/90 transition-colors shadow-2xl">
+          <span className="font-bbh text-white text-sm md:text-base tracking-wide">
             EXPLORE
           </span>
-          <span className="font-bbh text-white text-base tracking-wide">
+          <span className="font-bbh text-white text-sm md:text-base tracking-wide">
             MENU
           </span>
         </div>

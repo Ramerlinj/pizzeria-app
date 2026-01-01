@@ -1,6 +1,7 @@
 "use client";
 
-import { Menu } from "lucide-react";
+import { CiMenuFries as Menu} from "react-icons/ci";
+
 import Link from "next/link";
 import { useState } from "react";
 import { NAVBAR } from "@/data/header";

@@ -1,3 +1,5 @@
+import Cookies from "js-cookie";
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
 export interface User {
@@ -31,22 +33,15 @@ export interface RegisterCredentials {
 }
 
 export const setToken = (token: string) => {
-    if (typeof window !== "undefined") {
-        localStorage.setItem("auth_token", token);
-    }
+    Cookies.set("auth_token", token, { expires: 7, secure: true, sameSite: 'Strict' });
 };
 
-export const getToken = (): string | null => {
-    if (typeof window !== "undefined") {
-        return localStorage.getItem("auth_token");
-    }
-    return null;
+export const getToken = (): string | undefined => {
+    return Cookies.get("auth_token");
 };
 
 export const removeToken = () => {
-    if (typeof window !== "undefined") {
-        localStorage.removeItem("auth_token");
-    }
+    Cookies.remove("auth_token");
 };
 
 const getAuthHeaders = () => {

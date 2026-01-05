@@ -7,10 +7,20 @@ import logo from "@/public/logos/logotipo.svg";
 import { Button } from "@/components/ui/button";
 import { useScrolled } from "@/hooks/useScrolled";
 import Link from "next/link";
-import { User } from "lucide-react";
+import { LogOut, User as UserIcon } from "lucide-react";
+import { useAuth } from "@/components/providers/auth-provider";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function Header() {
   const scrolled = useScrolled(10);
+  const { user, logoutUser } = useAuth();
 
   return (
     <header
@@ -43,14 +53,51 @@ export default function Header() {
           </div>
 
           <div className="md:mr-20 flex items-center justify-end">
-            <Button
-              variant={"outline"}
-              size={"sm"}
-              className="bg-black/4 p-3 md:p-5 border-none font-heading rounded-3xl cursor-pointer hover:bg-huerto-texto/10 hover:text-huerto-texto text-pizza-texto transition-all duration-300"
-            >
-              <span className="hidden md:inline text-lg px-2 hover:text-huerto-texto/90">Inicia sesión</span>
-              <User className="size-5" />
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    className="bg-black/4 p-3 md:p-5 border-none font-heading rounded-3xl cursor-pointer hover:bg-huerto-texto/10 hover:text-huerto-texto text-pizza-texto transition-all duration-300"
+                  >
+                    <span className="text-lg px-2 hover:text-huerto-texto/90">
+                      {user.name || "Usuario"}
+                    </span>
+                    <UserIcon className="size-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem className="cursor-pointer">
+                    <UserIcon className="mr-2 h-4 w-4" />
+                    <span>Perfil</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={logoutUser}
+                    className="cursor-pointer text-red-600 focus:text-red-600"
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Cerrar sesión</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link href="/login">
+                <Button
+                  variant={"outline"}
+                  size={"sm"}
+                  className="bg-black/4 p-3 md:p-5 border-none font-heading rounded-3xl cursor-pointer hover:bg-huerto-texto/10 hover:text-huerto-texto text-pizza-texto transition-all duration-300"
+                >
+                  <span className="hidden md:inline text-lg px-2 hover:text-huerto-texto/90">
+                    Inicia sesión
+                  </span>
+                  <UserIcon className="size-5" />
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </div>

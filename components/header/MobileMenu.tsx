@@ -1,16 +1,24 @@
 "use client";
 
-import { CiMenuFries as Menu} from "react-icons/ci";
+import { CiMenuFries as Menu } from "react-icons/ci";
 
 import Link from "next/link";
 import { useState } from "react";
 import { NAVBAR } from "@/data/header";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import Image from "next/image";
 import logo from "@/public/logos/logotipo.svg";
+import { useAuth } from "@/components/providers/auth-provider";
+import { LogOut, User } from "lucide-react";
 
 export default function MobileMenu() {
   const [open, setOpen] = useState(false);
+  const { user, logoutUser } = useAuth();
 
   return (
     <>
@@ -54,7 +62,35 @@ export default function MobileMenu() {
             </ul>
           </nav>
 
-          <div className="absolute bottom-8 left-0 right-0 px-6">
+          <div className="absolute bottom-8 left-0 right-0 px-6 space-y-3">
+            {user ? (
+              <>
+                <div className="flex items-center gap-3 px-4 py-2 text-lg font-medium text-pizza-texto">
+                  <User className="size-5" />
+                  <span className="truncate">Hola, {user.name}</span>
+                </div>
+                <button
+                  onClick={() => {
+                    logoutUser();
+                    setOpen(false);
+                  }}
+                  className="flex items-center justify-center gap-2 w-full bg-gray-100 text-red-600 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                >
+                  <LogOut className="size-5" />
+                  Cerrar Sesión
+                </button>
+              </>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setOpen(false)}
+                className="flex items-center justify-center gap-2 w-full bg-pizza-naranja text-white py-3 rounded-lg font-semibold hover:bg-pizza-naranja/90 transition-colors"
+              >
+                <User className="size-5" />
+                Iniciar Sesión
+              </Link>
+            )}
+
             <Link
               href="/shop"
               onClick={() => setOpen(false)}

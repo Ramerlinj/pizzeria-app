@@ -7,7 +7,7 @@ import logo from "@/public/logos/logotipo.svg";
 import { Button } from "@/components/ui/button";
 import { useScrolled } from "@/hooks/useScrolled";
 import Link from "next/link";
-import { ShoppingBag } from "lucide-react";
+import { User } from "lucide-react";
 
 export default function Header() {
   const scrolled = useScrolled(10);
@@ -26,7 +26,6 @@ export default function Header() {
             <MobileMenu />
           </div>
 
-          {/* Logo */}
           <div className="md:ml-20">
             <Link href="/">
               <Image
@@ -39,20 +38,18 @@ export default function Header() {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:block">
             <HeaderItems />
           </div>
 
-          {/* Shop Button */}
           <div className="md:mr-20 flex items-center justify-end">
             <Button
               variant={"outline"}
               size={"sm"}
               className="bg-black/4 p-3 md:p-5 border-none font-heading rounded-3xl cursor-pointer hover:bg-huerto-texto/10 hover:text-huerto-texto text-pizza-texto transition-all duration-300"
             >
-              <span className="hidden md:inline text-lg px-2 hover:text-huerto-texto/90">Compra Online</span>
-              <ShoppingBag className="size-5" />
+              <span className="hidden md:inline text-lg px-2 hover:text-huerto-texto/90">Inicia sesión</span>
+              <User className="size-5" />
             </Button>
           </div>
         </div>

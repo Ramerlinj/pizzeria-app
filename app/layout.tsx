@@ -3,6 +3,7 @@ import { Inter, Oswald } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { AuthProvider } from "@/components/providers/auth-provider";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -38,8 +39,10 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${oswald.variable} ${bbh.variable} antialiased`}
       >
-        {children}
-        <Toaster />
+        <AuthProvider>
+          {children}
+          <Toaster />
+        </AuthProvider>
       </body>
     </html>
   );

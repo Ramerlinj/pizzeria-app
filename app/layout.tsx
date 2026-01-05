@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Oswald } from "next/font/google";
 import localFont from "next/font/local";
 import "./globals.css";
-import Header from "@/components/header/Header";
-import Footer from "@/components/footer/Footer";
+import { Toaster } from "@/components/ui/sonner";
 
 const oswald = Oswald({
   variable: "--font-oswald",
@@ -39,9 +38,8 @@ export default function RootLayout({
       <body
         className={`${inter.variable} ${oswald.variable} ${bbh.variable} antialiased`}
       >
-        <Header />
         {children}
-        <Footer />
+        <Toaster />
       </body>
     </html>
   );

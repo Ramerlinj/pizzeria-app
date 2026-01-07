@@ -30,9 +30,9 @@ export const MenuItemCard = ({ item }: MenuItemCardProps) => {
           {item.description}
         </p>
       </div>
-      <div className="relative w-24 h-24 flex-shrink-0 rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300">
+      <div className="relative w-24 h-24  rounded-full overflow-hidden border-4 border-white shadow-lg group-hover:scale-105 transition-transform duration-300">
         <Image
-          src={item.imageUrl}
+          src={item.image_url}
           alt={item.name}
           fill
           className="object-cover"

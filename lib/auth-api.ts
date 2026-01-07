@@ -44,7 +44,7 @@ export const removeToken = () => {
     Cookies.remove("auth_token");
 };
 
-const getAuthHeaders = () => {
+export const getAuthHeaders = () => {
     const token = getToken();
     return {
         "Content-Type": "application/json",

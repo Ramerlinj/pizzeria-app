@@ -50,11 +50,17 @@ export const CartSheet = () => {
       </SheetTrigger>
       <SheetContent
         side="right"
-        className={`w-full ${step >= 2 ? "sm:max-w-4xl lg:max-w-5xl" : "sm:max-w-xl"} overflow-y-auto transition-all duration-500 ease-in-out`}
+        className={`w-full ${
+          step >= 2 ? "sm:max-w-4xl lg:max-w-5xl" : "sm:max-w-xl"
+        } overflow-y-auto transition-all duration-500 ease-in-out`}
       >
         <SheetHeader className="text-left">
-          <SheetTitle className="font-heading text-2xl text-pizza-texto">Tu pedido</SheetTitle>
-          <p className="text-sm text-gray-500">Completa dirección, carrito y pago en el lateral.</p>
+          <SheetTitle className="font-heading text-2xl text-pizza-texto">
+            Tu pedido
+          </SheetTitle>
+          <p className="text-sm text-gray-500">
+            Completa dirección, carrito y pago en el lateral.
+          </p>
         </SheetHeader>
         <div className="mt-6 pb-10">
           <CheckoutSidebar />

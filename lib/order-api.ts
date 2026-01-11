@@ -20,12 +20,26 @@ export interface CreateOrderPayload {
     items: OrderItemPayload[];
 }
 
+export interface Payment {
+    id: number;
+    method: "cash" | "card";
+    status: "pending" | "paid" | "approved" | "rejected";
+    amount: number;
+    transaction_id?: string | null;
+    created_at?: string;
+}
+
 export interface Order {
     id: number;
     status: string;
     total: number;
     items?: OrderItemPayload[];
     created_at?: string;
+}
+
+export interface OrderDetail extends Order {
+    payments?: Payment[];
+    address?: AddressPayload & { id?: number };
 }
 
 export async function createOrder(payload: CreateOrderPayload): Promise<Order> {
@@ -63,8 +77,9 @@ export async function createPayment(orderId: number, payload: CreatePaymentPaylo
     return data?.data ?? data;
 }
 
-export async function listOrders(): Promise<Order[]> {
-    const res = await fetch(`${API_URL}/orders`, {
+export async function listOrders(options?: { all?: boolean }): Promise<Order[]> {
+    const search = options?.all ? "?all=true" : "";
+    const res = await fetch(`${API_URL}/orders${search}`, {
         method: "GET",
         headers: getAuthHeaders(),
         cache: "no-store",
@@ -75,4 +90,28 @@ export async function listOrders(): Promise<Order[]> {
     if (Array.isArray(payload)) return payload;
     if (Array.isArray(payload?.orders)) return payload.orders;
     return [];
+}
+
+export async function getOrder(orderId: number): Promise<OrderDetail> {
+    const res = await fetch(`${API_URL}/orders/${orderId}`, {
+        method: "GET",
+        headers: getAuthHeaders(),
+        cache: "no-store",
+    });
+    if (!res.ok) throw new Error("No se pudo obtener la orden");
+    const data = await res.json();
+    const payload = data?.data ?? data;
+    if (payload?.order) return payload.order;
+    return payload;
+}
+
+export async function updateOrderStatus(orderId: number, status: string) {
+    const res = await fetch(`${API_URL}/orders/${orderId}/status`, {
+        method: "PUT",
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ status }),
+    });
+    if (!res.ok) throw new Error("No se pudo actualizar el estado");
+    const data = await res.json();
+    return data?.data ?? data;
 }

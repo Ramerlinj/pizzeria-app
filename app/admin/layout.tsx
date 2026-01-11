@@ -1,11 +1,40 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./_components/app-sidebar";
+import { useAuth } from "@/components/providers/auth-provider";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, loading, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (
+      !loading &&
+      (!isAuthenticated || !["admin", "superadmin"].includes(user?.role || ""))
+    ) {
+      router.push("/");
+    }
+  }, [isAuthenticated, loading, router, user?.role]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-huerto-texto">
+        Verificando sesión...
+      </div>
+    );
+  }
+
+  if (!isAuthenticated || !["admin", "superadmin"].includes(user?.role || "")) {
+    return null;
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />

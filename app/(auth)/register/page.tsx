@@ -62,8 +62,9 @@ export default function RegisterPage() {
       await refreshUser();
       toast.success("Cuenta creada exitosamente!");
       router.push("/");
-    } catch (error: any) {
-      toast.error(error.message || "Error al registrarse");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : null;
+      toast.error(message || "Error al registrarse");
     } finally {
       setLoading(false);
     }
@@ -277,7 +278,7 @@ export default function RegisterPage() {
               ))}
             </div>
             <p className="text-xl font-bold text-white font-heading leading-tight mb-2">
-              "La mejor pizza que he probado en mi vida!"
+              &ldquo;La mejor pizza que he probado en mi vida!&rdquo;
             </p>
             <p className="text-sm text-white/80">— Happy Customer</p>
           </div>

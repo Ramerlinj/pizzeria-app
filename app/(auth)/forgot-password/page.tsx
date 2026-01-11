@@ -18,6 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { toast } from "sonner";
+import { forgotPassword } from "@/lib/auth-api";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -35,10 +36,17 @@ export default function ForgotPasswordPage() {
 
   async function onSubmit(values: z.infer<typeof forgotPasswordSchema>) {
     setLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success("Si el email existe, recibirás instrucciones.");
-    setLoading(false);
+    try {
+      await forgotPassword(values.email);
+      toast.success("Si el email existe, recibirás instrucciones.");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "No se pudo enviar el enlace";
+      console.error(error);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

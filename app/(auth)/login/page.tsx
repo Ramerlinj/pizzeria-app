@@ -49,8 +49,9 @@ export default function LoginPage() {
       await refreshUser();
       toast.success("Bienvenido de nuevo!");
       router.push("/"); // Redirect to home or dashboard
-    } catch (error:any) {
-      toast.error(error?.message || "Credenciales inválidas");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : null;
+      toast.error(message || "Credenciales inválidas");
     } finally {
       setLoading(false);
     }
@@ -201,9 +202,11 @@ export default function LoginPage() {
             ))}
           </div>
           <p className="text-2xl font-bold font-heading leading-tight mb-2">
-            "La mejor pizza que he probado en mi vida!"
+            &ldquo;La mejor pizza que he probado en mi vida!&rdquo;
           </p>
-          <p className="text-sm opacity-80">Amada por más de 10,000 amantes de la pizza</p>
+          <p className="text-sm opacity-80">
+            Amada por más de 10,000 amantes de la pizza
+          </p>
         </div>
       </div>
     </div>

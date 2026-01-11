@@ -1,6 +1,12 @@
 "use client";
 
-import { Pizza, Settings, LayoutDashboard, Carrot } from "lucide-react";
+import {
+  Pizza,
+  Settings,
+  LayoutDashboard,
+  Carrot,
+  ListOrdered,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -27,6 +33,11 @@ const items = [
     title: "Productos",
     url: "/admin/products",
     icon: Pizza,
+  },
+  {
+    title: "Órdenes",
+    url: "/admin/orders",
+    icon: ListOrdered,
   },
   {
     title: "Ingredientes",

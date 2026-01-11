@@ -15,12 +15,10 @@ import {
 import { Edit, Plus, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
   useEffect(() => {
     loadProducts();
@@ -30,8 +28,9 @@ export default function ProductsPage() {
     try {
       const data = await getProducts();
       setProducts(data);
-    } catch (error) {
-      toast.error("Error al cargar los productos");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : null;
+      toast.error(message || "Error al cargar los productos");
     } finally {
       setLoading(false);
     }
@@ -43,8 +42,9 @@ export default function ProductsPage() {
         await deleteProduct(id);
         toast.success("Producto eliminado correctamente");
         loadProducts();
-      } catch (error) {
-        toast.error("Error al eliminar el producto");
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : null;
+        toast.error(message || "Error al eliminar el producto");
       }
     }
   };

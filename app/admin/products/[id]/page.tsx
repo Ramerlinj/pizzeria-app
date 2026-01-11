@@ -2,7 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { ProductForm } from "../_components/product-form";
-import { getProduct } from "@/lib/admin-api";
+import { getProduct, getProductIngredients } from "@/lib/admin-api";
 import { MenuItem } from "@/data/menu";
 import { toast } from "sonner";
 
@@ -18,9 +18,11 @@ export default function EditProductPage({
   useEffect(() => {
     const loadProduct = async () => {
       try {
-        const data = await getProduct(parseInt(id));
+        const numericId = parseInt(id);
+        const data = await getProduct(numericId);
         if (data) {
-          setProduct(data);
+          const ingredientIds = await getProductIngredients(numericId);
+          setProduct({ ...data, ingredients: ingredientIds });
         } else {
           toast.error("Producto no encontrado");
         }

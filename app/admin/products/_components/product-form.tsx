@@ -48,6 +48,10 @@ const formSchema = z.object({
   ingredients: z.array(z.number()).optional(),
 });
 
+type FormSchema = typeof formSchema;
+type FormValues = z.output<FormSchema>;
+type FormInput = z.input<FormSchema>;
+
 interface ProductFormProps {
   initialData?: MenuItem;
 }
@@ -70,7 +74,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
     loadIngredients();
   }, []);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormInput, any, FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || "",
@@ -86,7 +90,7 @@ export function ProductForm({ initialData }: ProductFormProps) {
 
   const typeProduct = form.watch("type_product");
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: FormValues) {
     setLoading(true);
     try {
       const formattedValues = {
@@ -175,6 +179,12 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     step="0.01"
                     placeholder="0.00"
                     {...field}
+                    value={field.value === undefined || field.value === null ? "" : Number(field.value)}
+                    onChange={(event) => {
+                      const raw = event.target.value;
+                      const numeric = raw === "" ? "" : Number(raw);
+                      field.onChange(numeric);
+                    }}
                     className="border-huerto-verde/20 focus-visible:ring-huerto-verde"
                   />
                 </FormControl>

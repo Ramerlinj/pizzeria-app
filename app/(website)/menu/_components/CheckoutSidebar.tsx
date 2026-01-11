@@ -23,7 +23,7 @@ import {
   ArrowLeft,
   CheckCircle,
 } from "lucide-react";
-import { useCart } from "./cart-context";
+import { useCart, CheckoutStep } from "./cart-context";
 import { listCities, City } from "@/lib/city-api";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useRouter } from "next/navigation";
@@ -140,14 +140,20 @@ export const CheckoutSidebar = () => {
     step,
   ]);
 
+  const clampStep = (candidate: number): CheckoutStep => {
+    if (candidate < 0) return 0;
+    if (candidate > 3) return 3;
+    return candidate as CheckoutStep;
+  };
+
   const nextStep = () => {
     if (!isAuthenticated) {
       router.push("/login");
       return;
     }
-    setStep(Math.min(3, (step + 1) as any));
+    setStep(clampStep(step + 1));
   };
-  const prevStep = () => setStep(Math.max(0, (step - 1) as any));
+  const prevStep = () => setStep(clampStep(step - 1));
 
   const processPurchase = async () => {
     if (!isAuthenticated) {
@@ -200,7 +206,7 @@ export const CheckoutSidebar = () => {
       setOrderSuccess(true);
       toast.success("Compra procesada con éxito");
       resetCart();
-      setStep(0 as any);
+      setStep(0);
     } catch (error: any) {
       console.error(error);
       toast.error(error?.message || "No se pudo procesar la compra");

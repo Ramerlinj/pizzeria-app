@@ -14,7 +14,6 @@ import { CheckoutSidebar } from "./CheckoutSidebar";
 import { useAuth } from "@/components/providers/auth-provider";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { toast } from "sonner";
 
 export const CartSheet = () => {
   const { items, step } = useCart();

@@ -79,10 +79,11 @@ export const CheckoutSidebar = () => {
     try {
       const data = await listCities();
       setCities(data);
-    } catch (error) {
+    } catch (error: unknown) {
       console.error(error);
-      setCitiesError("No se pudieron cargar las ciudades");
-      toast.error("No se pudieron cargar las ciudades");
+      const message = error instanceof Error ? error.message : null;
+      setCitiesError(message || "No se pudieron cargar las ciudades");
+      toast.error(message || "No se pudieron cargar las ciudades");
     } finally {
       setLoadingCities(false);
     }
@@ -103,10 +104,11 @@ export const CheckoutSidebar = () => {
       try {
         const data = await listAddresses();
         setSavedAddresses(Array.isArray(data) ? data : []);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error(error);
-        setAddressesError("No se pudieron cargar tus direcciones");
-        toast.error("No se pudieron cargar tus direcciones");
+        const message = error instanceof Error ? error.message : null;
+        setAddressesError(message || "No se pudieron cargar tus direcciones");
+        toast.error(message || "No se pudieron cargar tus direcciones");
       } finally {
         setLoadingAddresses(false);
       }
@@ -207,9 +209,10 @@ export const CheckoutSidebar = () => {
       toast.success("Compra procesada con éxito");
       resetCart();
       setStep(0);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(error?.message || "No se pudo procesar la compra");
+      const message = error instanceof Error ? error.message : null;
+      toast.error(message || "No se pudo procesar la compra");
     } finally {
       setProcessingOrder(false);
     }

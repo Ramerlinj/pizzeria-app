@@ -179,7 +179,11 @@ export function ProductForm({ initialData }: ProductFormProps) {
                     step="0.01"
                     placeholder="0.00"
                     {...field}
-                    value={field.value === undefined || field.value === null ? "" : Number(field.value)}
+                    value={
+                      field.value === undefined || field.value === null
+                        ? ""
+                        : Number(field.value)
+                    }
                     onChange={(event) => {
                       const raw = event.target.value;
                       const numeric = raw === "" ? "" : Number(raw);

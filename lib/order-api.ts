@@ -35,6 +35,12 @@ export interface Order {
     total: number;
     items?: OrderItemPayload[];
     created_at?: string;
+    user?: {
+        id?: number;
+        name?: string;
+        email?: string;
+        phone?: string;
+    };
 }
 
 export interface OrderDetail extends Order {

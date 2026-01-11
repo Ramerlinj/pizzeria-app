@@ -126,3 +126,38 @@ export const logout = async (): Promise<void> => {
         removeToken();
     }
 };
+
+export const forgotPassword = async (email: string): Promise<void> => {
+    const res = await fetch(`${API_URL}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        body: JSON.stringify({ email }),
+    });
+    if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error?.message || "No se pudo solicitar el enlace");
+    }
+};
+
+export const resetPassword = async (payload: {
+    email: string;
+    token: string;
+    password: string;
+    password_confirmation: string;
+}): Promise<void> => {
+    const res = await fetch(`${API_URL}/auth/reset-password`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        },
+        body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+        const error = await res.json().catch(() => ({}));
+        throw new Error(error?.message || "No se pudo restablecer la contraseña");
+    }
+};

@@ -1,16 +1,34 @@
+"use client";
+
 import { MenuItem, Ingredient } from "@/data/menu";
+import { getToken } from "@/lib/auth-api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
-// Helper to get auth headers
-const getAuthHeaders = () => {
-    return {
-        'Accept': 'application/json',
-        // 'Authorization': `Bearer ${token}`, // Implement token retrieval if needed
-    };
+type UnknownRecord = Record<string, unknown>;
+
+const isRecord = (value: unknown): value is UnknownRecord =>
+    typeof value === "object" && value !== null;
+
+const toNumber = (value: unknown, fallback = 0): number => {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") {
+        const parsed = parseFloat(value);
+        return Number.isNaN(parsed) ? fallback : parsed;
+    }
+    return fallback;
 };
 
-// Helper to convert Base64 to Blob
+const getAuthHeaders = (opts?: { json?: boolean }) => {
+    const token = getToken();
+    const headers: Record<string, string> = {
+        Accept: "application/json",
+    };
+    if (opts?.json) headers["Content-Type"] = "application/json";
+    if (token) headers.Authorization = `Bearer ${token}`;
+    return headers;
+};
+
 const base64ToBlob = async (base64: string): Promise<Blob> => {
     const res = await fetch(base64);
     return await res.blob();
@@ -25,46 +43,71 @@ export const getProducts = async (): Promise<MenuItem[]> => {
     if (!res.ok) throw new Error("Failed to fetch products");
     const data = await res.json();
 
-    // Handle various response structures based on backend implementation
-    let productsList: any[] = [];
+    let productsList: unknown[] = [];
     if (Array.isArray(data)) {
         productsList = data;
-    } else if (Array.isArray(data.data)) {
+    } else if (isRecord(data) && Array.isArray(data.data)) {
         productsList = data.data;
-    } else if (data.products && Array.isArray(data.products)) {
+    } else if (isRecord(data) && Array.isArray(data.products)) {
         productsList = data.products;
-    } else if (data.products && data.products.products && Array.isArray(data.products.products)) {
-        // Handles nested structure: { products: { products: [...] } }
-        productsList = data.products.products;
+    } else if (
+        isRecord(data) &&
+        isRecord(data.products) &&
+        Array.isArray((data.products as UnknownRecord).products)
+    ) {
+        productsList = (data.products as UnknownRecord).products as unknown[];
     }
 
-    return productsList.map((p: any) => {
-        // Handle image_url being an object (e.g. media library) or string
-        let imageUrl = "/pizzas/pizza-home-1.webp"; // Default fallback
-        if (typeof p.image_url === 'string') {
+    return productsList.map((raw) => {
+        const p = isRecord(raw) ? raw : {};
+        let imageUrl = "/pizzas/pizza-home-1.webp";
+        if (typeof p.image_url === "string") {
             imageUrl = p.image_url;
-        } else if (typeof p.image === 'string') {
+        } else if (typeof p.image === "string") {
             imageUrl = p.image;
-        } else if (typeof p.image_url === 'object' && p.image_url !== null) {
-            // Try to find a url property in the object
-            imageUrl = p.image_url.url || p.image_url.original_url || p.image_url.path || imageUrl;
+        } else if (isRecord(p.image_url)) {
+            imageUrl =
+                (p.image_url.url as string) ||
+                (p.image_url.original_url as string) ||
+                (p.image_url.path as string) ||
+                imageUrl;
         }
 
         return {
-            ...p,
-            price: typeof p.price === 'string' ? parseFloat(p.price) : p.price,
+            ...(p as UnknownRecord),
+            price: toNumber(p.price, 0),
             image_url: imageUrl,
-            type_product: p.type_product,
-            is_recommended: !!p.is_recommended,
-        };
+            type_product: (p.type_product as MenuItem["type_product"]) || "pizza",
+            is_recommended: Boolean(p.is_recommended),
+        } as MenuItem;
     });
 };
 
+export const getProductIngredients = async (id: number): Promise<number[]> => {
+    const res = await fetch(`${API_URL}/products/${id}/ingredients`, {
+        headers: getAuthHeaders(),
+        cache: "no-store",
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const list: unknown[] = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data)
+            ? data
+            : [];
+    return list
+        .map((item) => {
+            if (!isRecord(item)) return null;
+            const rawId = item.id ?? (item as UnknownRecord).ingredient_id;
+            const numId = toNumber(rawId, NaN);
+            return Number.isFinite(numId) ? numId : null;
+        })
+        .filter((num): num is number => num !== null);
+};
+
 export const getProduct = async (id: number): Promise<MenuItem | undefined> => {
-    // Fallback: Fetch all products and find the one we need, since GET /products/:id is not supported
     const products = await getProducts();
     const product = products.find((p) => p.id === id);
-
     if (!product) return undefined;
 
     const ingredientsRes = await fetch(`${API_URL}/products/${id}/ingredients`, {
@@ -73,9 +116,19 @@ export const getProduct = async (id: number): Promise<MenuItem | undefined> => {
     let ingredientIds: number[] = [];
     if (ingredientsRes.ok) {
         const ingredientsData = await ingredientsRes.json();
-        // Handle ingredients structure
-        const ingredientsList = Array.isArray(ingredientsData.data) ? ingredientsData.data : (Array.isArray(ingredientsData) ? ingredientsData : []);
-        ingredientIds = ingredientsList.map((i: any) => i.id);
+        const ingredientsList: unknown[] = Array.isArray(ingredientsData?.data)
+            ? ingredientsData.data
+            : Array.isArray(ingredientsData)
+                ? ingredientsData
+                : [];
+        ingredientIds = ingredientsList
+            .map((i) => {
+                if (!isRecord(i)) return null;
+                const rawId = i.id ?? (i as UnknownRecord).ingredient_id;
+                const numId = toNumber(rawId, NaN);
+                return Number.isFinite(numId) ? numId : null;
+            })
+            .filter((num): num is number => num !== null);
     }
 
     return {
@@ -100,40 +153,35 @@ export const createProduct = async (product: Omit<MenuItem, "id">): Promise<Menu
 
     const res = await fetch(`${API_URL}/products`, {
         method: "POST",
-        headers: {
-            ...getAuthHeaders(),
-        },
+        headers: { ...getAuthHeaders() },
         body: formData,
     });
 
     if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to create product");
+        const errorData = await res.json().catch(() => ({}));
+        const message = (errorData as UnknownRecord).message as string | undefined;
+        throw new Error(message || "Failed to create product");
     }
 
     const data = await res.json();
-    const newProduct = data.data || data;
+    const newProduct = (data as UnknownRecord).data || data;
 
     if (product.ingredients && product.ingredients.length > 0) {
         for (const ingredientId of product.ingredients) {
-            await fetch(`${API_URL}/products/${newProduct.id}/ingredients`, {
+            await fetch(`${API_URL}/products/${(newProduct as UnknownRecord).id}/ingredients`, {
                 method: "POST",
-                headers: {
-                    ...getAuthHeaders(),
-                    "Content-Type": "application/json",
-                },
+                headers: getAuthHeaders({ json: true }),
                 body: JSON.stringify({ ingredient_id: ingredientId }),
             });
         }
     }
 
-    return newProduct;
+    return newProduct as MenuItem;
 };
 
 export const updateProduct = async (id: number, product: Partial<MenuItem>): Promise<MenuItem | undefined> => {
     const formData = new FormData();
     formData.append("_method", "PUT");
-
     if (product.name) formData.append("name", product.name);
     if (product.description) formData.append("description", product.description);
     if (product.price !== undefined) formData.append("price", product.price.toString());
@@ -148,36 +196,39 @@ export const updateProduct = async (id: number, product: Partial<MenuItem>): Pro
 
     const res = await fetch(`${API_URL}/products/${id}`, {
         method: "POST",
-        headers: {
-            ...getAuthHeaders(),
-        },
+        headers: { ...getAuthHeaders() },
         body: formData,
     });
 
     if (!res.ok) {
-        const errorData = await res.json();
-        console.error("Update Product Error:", errorData);
-        throw new Error(errorData.message || "Failed to update product");
+        const errorData = await res.json().catch(() => ({}));
+        const message = (errorData as UnknownRecord).message as string | undefined;
+        throw new Error(message || "Failed to update product");
     }
+
     const data = await res.json();
-    const updatedProduct = data.data || data; // Handle wrapped or unwrapped response
+    const updatedProduct = (data as UnknownRecord).data || data;
 
-    // Handle image url extraction for updated product
     let imageUrl = "/pizzas/pizza-home-1.webp";
-    if (typeof updatedProduct.image_url === 'string') {
-        imageUrl = updatedProduct.image_url;
-    } else if (typeof updatedProduct.image === 'string') {
-        imageUrl = updatedProduct.image;
-    } else if (typeof updatedProduct.image_url === 'object' && updatedProduct.image_url !== null) {
-        imageUrl = updatedProduct.image_url.url || updatedProduct.image_url.original_url || imageUrl;
+    if (isRecord(updatedProduct)) {
+        if (typeof updatedProduct.image_url === "string") {
+            imageUrl = updatedProduct.image_url;
+        } else if (typeof updatedProduct.image === "string") {
+            imageUrl = updatedProduct.image;
+        } else if (isRecord(updatedProduct.image_url)) {
+            imageUrl =
+                (updatedProduct.image_url.url as string) ||
+                (updatedProduct.image_url.original_url as string) ||
+                imageUrl;
+        }
     }
 
-    const finalProduct = {
-        ...updatedProduct,
-        price: typeof updatedProduct.price === 'string' ? parseFloat(updatedProduct.price) : updatedProduct.price,
+    const finalProduct: MenuItem = {
+        ...(updatedProduct as UnknownRecord),
+        price: toNumber((updatedProduct as UnknownRecord).price, 0),
         image_url: imageUrl,
-        is_recommended: !!updatedProduct.is_recommended,
-    };
+        is_recommended: Boolean((updatedProduct as UnknownRecord).is_recommended),
+    } as MenuItem;
 
     if (product.ingredients) {
         const currentIngredientsRes = await fetch(`${API_URL}/products/${id}/ingredients`, {
@@ -186,30 +237,37 @@ export const updateProduct = async (id: number, product: Partial<MenuItem>): Pro
 
         if (currentIngredientsRes.ok) {
             const currentData = await currentIngredientsRes.json();
-            const currentIngredients = currentData.data;
+            const currentIngredients: UnknownRecord[] = Array.isArray(currentData?.data)
+                ? (currentData.data as UnknownRecord[])
+                : [];
 
             const newIngredientIds = new Set(product.ingredients);
-            const currentIngredientIds = new Set(currentIngredients.map((i: any) => i.id));
+            const currentIngredientIds = new Set(
+                currentIngredients
+                    .map((i) => (typeof i.id === "number" ? i.id : null))
+                    .filter((num): num is number => num !== null)
+            );
 
             for (const ingId of product.ingredients) {
                 if (!currentIngredientIds.has(ingId)) {
                     await fetch(`${API_URL}/products/${id}/ingredients`, {
                         method: "POST",
-                        headers: { ...getAuthHeaders(), "Content-Type": "application/json" },
+                        headers: getAuthHeaders({ json: true }),
                         body: JSON.stringify({ ingredient_id: ingId }),
                     });
                 }
             }
 
             for (const ing of currentIngredients) {
-                if (!newIngredientIds.has(ing.id)) {
-                    // Try to use pivot ID if available, otherwise fallback to ingredient ID (though likely incorrect for this endpoint)
-                    const pivotId = ing.pivot?.id || ing.id;
-                    await fetch(`${API_URL}/products/${id}/ingredients/${pivotId}`, {
-                        method: "DELETE",
-                        headers: getAuthHeaders(),
-                    });
-                }
+                const ingId = typeof ing.id === "number" ? ing.id : null;
+                if (!ingId || newIngredientIds.has(ingId)) continue;
+                const pivotId = isRecord(ing.pivot) && typeof ing.pivot.id === "number"
+                    ? ing.pivot.id
+                    : ingId;
+                await fetch(`${API_URL}/products/${id}/ingredients/${pivotId}`, {
+                    method: "DELETE",
+                    headers: getAuthHeaders(),
+                });
             }
         }
     }
@@ -218,8 +276,6 @@ export const updateProduct = async (id: number, product: Partial<MenuItem>): Pro
 };
 
 export const deleteProduct = async (id: number): Promise<boolean> => {
-    // Note: The provided API documentation does not explicitly show a DELETE /api/products/{id} endpoint.
-    // We will try to call it, but if it fails with 404 or 405, it means the API doesn't support it.
     const res = await fetch(`${API_URL}/products/${id}`, {
         method: "DELETE",
         headers: getAuthHeaders(),
@@ -240,65 +296,94 @@ export const getIngredients = async (): Promise<Ingredient[]> => {
     if (!res.ok) throw new Error("Failed to fetch ingredients");
     const data = await res.json();
 
-    let ingredientsList: any[] = [];
+    let ingredientsList: unknown[] = [];
     if (Array.isArray(data)) {
         ingredientsList = data;
-    } else if (Array.isArray(data.data)) {
+    } else if (isRecord(data) && Array.isArray(data.data)) {
         ingredientsList = data.data;
-    } else if (data.ingredients && Array.isArray(data.ingredients)) {
+    } else if (isRecord(data) && Array.isArray(data.ingredients)) {
         ingredientsList = data.ingredients;
     }
 
-    return ingredientsList.map((i: any) => ({
-        ...i,
-        price: typeof i.price === 'string' ? parseFloat(i.price) : i.price,
-        type: i.ingredient,
-    }));
+    return ingredientsList.map((i) => {
+        const ing = isRecord(i) ? i : {};
+        const idValue = isRecord(i)
+            ? toNumber(i.id ?? (i as UnknownRecord).ingredient_id, 0)
+            : 0;
+        return {
+            ...(ing as UnknownRecord),
+            id: idValue,
+            price: toNumber(ing.price, 0),
+            available: Boolean((ing as UnknownRecord).available ?? true),
+            type: (ing.ingredient as Ingredient["type"]) || "extra",
+        } as Ingredient;
+    });
 };
 
 export const createIngredient = async (ingredient: Omit<Ingredient, "id">): Promise<Ingredient> => {
-    const formData = new FormData();
-    formData.append("name", ingredient.name);
-    formData.append("price", ingredient.price.toString());
-    formData.append("ingredient", ingredient.type);
-    formData.append("available", ingredient.available ? "1" : "0");
-
-    const dummyBlob = new Blob([""], { type: "image/png" });
-    formData.append("image", dummyBlob, "placeholder.png");
+    const payload = {
+        name: ingredient.name,
+        price: ingredient.price,
+        ingredient: ingredient.type,
+        available: ingredient.available ? 1 : 0,
+    };
 
     const res = await fetch(`${API_URL}/ingredients`, {
         method: "POST",
-        headers: { ...getAuthHeaders() },
-        body: formData,
+        headers: getAuthHeaders({ json: true }),
+        body: JSON.stringify(payload),
     });
 
     if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Failed to create ingredient");
+        const errorData = await res.json().catch(() => ({}));
+        const message = (errorData as UnknownRecord).message as string | undefined;
+        throw new Error(message || "Failed to create ingredient");
     }
 
     const data = await res.json();
-    return { ...data.data, type: data.data.ingredient };
+    const raw = (data as UnknownRecord).data ?? data;
+    if (!isRecord(raw)) {
+        throw new Error("Respuesta inválida al crear ingrediente");
+    }
+    return {
+        ...(raw as UnknownRecord),
+        price: toNumber(raw.price, ingredient.price),
+        available: Boolean(raw.available ?? ingredient.available),
+        type: (raw.ingredient as Ingredient["type"]) || ingredient.type,
+    } as Ingredient;
 };
 
 export const updateIngredient = async (id: number, ingredient: Partial<Ingredient>): Promise<Ingredient | undefined> => {
-    const formData = new FormData();
-    formData.append("_method", "PUT");
-
-    if (ingredient.name) formData.append("name", ingredient.name);
-    if (ingredient.price !== undefined) formData.append("price", ingredient.price.toString());
-    if (ingredient.type) formData.append("ingredient", ingredient.type);
-    if (ingredient.available !== undefined) formData.append("available", ingredient.available ? "1" : "0");
+    const payload: Record<string, unknown> = {
+        _method: "PUT",
+    };
+    if (ingredient.name) payload.name = ingredient.name;
+    if (ingredient.price !== undefined) payload.price = ingredient.price;
+    if (ingredient.type) payload.ingredient = ingredient.type;
+    if (ingredient.available !== undefined) payload.available = ingredient.available ? 1 : 0;
 
     const res = await fetch(`${API_URL}/ingredients/${id}`, {
         method: "POST",
-        headers: { ...getAuthHeaders() },
-        body: formData,
+        headers: getAuthHeaders({ json: true }),
+        body: JSON.stringify(payload),
     });
 
-    if (!res.ok) throw new Error("Failed to update ingredient");
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        const message = (errorData as UnknownRecord).message as string | undefined;
+        throw new Error(message || "Failed to update ingredient");
+    }
     const data = await res.json();
-    return { ...data.data, type: data.data.ingredient };
+    const raw = (data as UnknownRecord).data ?? data;
+    if (!isRecord(raw)) {
+        throw new Error("Respuesta inválida al actualizar ingrediente");
+    }
+    return {
+        ...(raw as UnknownRecord),
+        price: toNumber(raw.price, typeof ingredient.price === "number" ? ingredient.price : 0),
+        available: Boolean(raw.available ?? ingredient.available),
+        type: (raw.ingredient as Ingredient["type"]) || ingredient.type || "extra",
+    } as Ingredient;
 };
 
 export const deleteIngredient = async (id: number): Promise<boolean> => {

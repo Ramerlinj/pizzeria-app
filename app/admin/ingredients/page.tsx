@@ -24,7 +24,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Select,
@@ -48,10 +47,10 @@ export default function IngredientsPage() {
   );
   const [formData, setFormData] = useState<{
     name: string;
-    price: number;
+    price: number | "";
     available: boolean;
     type: "base" | "salsa" | "queso" | "extra";
-  }>({ name: "", price: 0, available: true, type: "extra" });
+  }>({ name: "", price: "", available: true, type: "extra" });
 
   useEffect(() => {
     loadIngredients();
@@ -61,8 +60,9 @@ export default function IngredientsPage() {
     try {
       const data = await getIngredients();
       setIngredients(data);
-    } catch (error) {
-      toast.error("Error al cargar los ingredientes");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : null;
+      toast.error(message || "Error al cargar los ingredientes");
     } finally {
       setLoading(false);
     }
@@ -71,19 +71,32 @@ export default function IngredientsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const priceValue =
+        typeof formData.price === "string"
+          ? parseFloat(formData.price)
+          : formData.price;
+
+      if (!Number.isFinite(priceValue)) {
+        toast.error("Ingresa un precio válido");
+        return;
+      }
+
+      const payload = { ...formData, price: priceValue };
+
       if (editingIngredient) {
-        await updateIngredient(editingIngredient.id, formData);
+        await updateIngredient(editingIngredient.id, payload);
         toast.success("Ingrediente actualizado");
       } else {
-        await createIngredient(formData);
+        await createIngredient(payload);
         toast.success("Ingrediente creado");
       }
       setIsDialogOpen(false);
-      setFormData({ name: "", price: 0, available: true, type: "extra" });
+      setFormData({ name: "", price: "", available: true, type: "extra" });
       setEditingIngredient(null);
       loadIngredients();
-    } catch (error) {
-      toast.error("Error al guardar el ingrediente");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : null;
+      toast.error(message || "Error al guardar el ingrediente");
     }
   };
 
@@ -104,15 +117,16 @@ export default function IngredientsPage() {
         await deleteIngredient(id);
         toast.success("Ingrediente eliminado");
         loadIngredients();
-      } catch (error) {
-        toast.error("Error al eliminar el ingrediente");
+      } catch (error: unknown) {
+        const message = error instanceof Error ? error.message : null;
+        toast.error(message || "Error al eliminar el ingrediente");
       }
     }
   };
 
   const openNewDialog = () => {
     setEditingIngredient(null);
-    setFormData({ name: "", price: 0, available: true, type: "extra" });
+    setFormData({ name: "", price: "", available: true, type: "extra" });
     setIsDialogOpen(true);
   };
 
@@ -279,13 +293,14 @@ export default function IngredientsPage() {
                   id="price"
                   type="number"
                   step="0.01"
-                  value={formData.price}
-                  onChange={(e) =>
+                  value={formData.price === "" ? "" : formData.price}
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setFormData({
                       ...formData,
-                      price: parseFloat(e.target.value),
-                    })
-                  }
+                      price: value === "" ? "" : parseFloat(value),
+                    });
+                  }}
                   className="col-span-3 border-huerto-verde/20 focus-visible:ring-huerto-verde"
                   required
                 />

@@ -66,15 +66,18 @@ export function ProductForm({ initialData }: ProductFormProps) {
       try {
         const data = await getIngredients();
         setIngredients(data);
-      } catch (error) {
+      } catch (error: unknown) {
         console.error("Error loading ingredients:", error);
-        toast.error("No se pudieron cargar los ingredientes disponibles");
+        const message = error instanceof Error ? error.message : null;
+        toast.error(
+          message || "No se pudieron cargar los ingredientes disponibles"
+        );
       }
     };
     loadIngredients();
   }, []);
 
-  const form = useForm<FormInput, any, FormValues>({
+  const form = useForm<FormInput, unknown, FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: initialData?.name || "",
@@ -87,6 +90,26 @@ export function ProductForm({ initialData }: ProductFormProps) {
       ingredients: initialData?.ingredients || [],
     },
   });
+
+  useEffect(() => {
+    if (!initialData) return;
+    form.reset({
+      name: initialData.name || "",
+      description: initialData.description || "",
+      price: initialData.price || 0,
+      image_url: initialData.image_url || "/pizzas/pizza-home-1.webp",
+      type_product: initialData.type_product || "pizza",
+      is_recommended: initialData.is_recommended || false,
+      badge: initialData.badge || "",
+      ingredients: initialData.ingredients || [],
+    });
+  }, [form, initialData]);
+
+  useEffect(() => {
+    if (initialData?.ingredients) {
+      form.setValue("ingredients", initialData.ingredients);
+    }
+  }, [form, initialData?.ingredients]);
 
   const typeProduct = form.watch("type_product");
 
@@ -110,9 +133,10 @@ export function ProductForm({ initialData }: ProductFormProps) {
       }
       router.push("/admin/products");
       router.refresh();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(error.message || "Hubo un error al guardar el producto");
+      const message = error instanceof Error ? error.message : null;
+      toast.error(message || "Hubo un error al guardar el producto");
     } finally {
       setLoading(false);
     }

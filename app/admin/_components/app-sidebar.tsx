@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/components/providers/auth-provider";
 import Image from "next/image";
 import logo from "@/public/logos/logotipo.svg";
 
@@ -40,6 +41,12 @@ const items = [
     icon: ListOrdered,
   },
   {
+    title: "Usuarios",
+    url: "/admin/users",
+    icon: LayoutDashboard,
+    roles: ["superadmin"],
+  },
+  {
     title: "Ingredientes",
     url: "/admin/ingredients",
     icon: Carrot,
@@ -53,6 +60,12 @@ const items = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  const allowedItems = items.filter((item) => {
+    if (!item.roles) return true;
+    return item.roles.includes(user?.role || "user");
+  });
 
   return (
     <Sidebar className="border-r border-huerto-verde/20 bg-huerto-crema/50">
@@ -71,7 +84,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent className="pt-4">
             <SidebarMenu>
-              {items.map((item) => (
+              {allowedItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild

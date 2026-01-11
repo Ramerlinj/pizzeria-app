@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -12,6 +12,13 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   listOrders,
   getOrder,
@@ -38,6 +45,8 @@ const statusStyle: Record<string, string> = {
   approved: "bg-green-100 text-green-700",
 };
 
+const archivedStatuses = ["delivered", "cancelled"] as const;
+
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
@@ -45,47 +54,89 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [archivedFilter, setArchivedFilter] = useState<string>("all");
+  const [showArchived, setShowArchived] = useState(false);
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
     try {
       const data = await listOrders({ all: true });
       setOrders(data);
-      if (data.length && !selectedId) {
-        setSelectedId(data[0].id);
-      }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(error?.message || "No se pudieron cargar las órdenes");
+      const message = error instanceof Error ? error.message : null;
+      toast.error(message || "No se pudieron cargar las órdenes");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchDetail = async (id: number) => {
+  const fetchDetail = useCallback(async (id: number) => {
     setLoadingDetail(true);
     try {
       const data = await getOrder(id);
       setDetail(data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(error?.message || "No se pudo cargar la orden");
+      const message = error instanceof Error ? error.message : null;
+      toast.error(message || "No se pudo cargar la orden");
     } finally {
       setLoadingDetail(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
 
   useEffect(() => {
     if (selectedId) {
       fetchDetail(selectedId);
     }
-  }, [selectedId]);
+  }, [fetchDetail, selectedId]);
+
+  useEffect(() => {
+    if (!orders.length) return;
+    const active = orders.filter(
+      (o) =>
+        !archivedStatuses.includes(
+          o.status as (typeof archivedStatuses)[number]
+        )
+    );
+    const target = active[0] || orders[0];
+    if (!selectedId || !orders.find((o) => o.id === selectedId)) {
+      setSelectedId(target?.id ?? null);
+    }
+  }, [orders, selectedId]);
 
   const selectedStatus = useMemo(() => detail?.status || "", [detail]);
+
+  const filteredActiveOrders = useMemo(
+    () =>
+      orders.filter((order) => {
+        const isArchived = archivedStatuses.includes(
+          order.status as (typeof archivedStatuses)[number]
+        );
+        if (isArchived) return false;
+        if (statusFilter === "all") return true;
+        return order.status === statusFilter;
+      }),
+    [orders, statusFilter]
+  );
+
+  const filteredArchivedOrders = useMemo(
+    () =>
+      orders.filter((order) => {
+        const isArchived = archivedStatuses.includes(
+          order.status as (typeof archivedStatuses)[number]
+        );
+        if (!isArchived) return false;
+        if (archivedFilter === "all") return true;
+        return order.status === archivedFilter;
+      }),
+    [orders, archivedFilter]
+  );
 
   const handleStatusChange = async (status: string) => {
     if (!detail?.id) return;
@@ -97,9 +148,10 @@ export default function AdminOrdersPage() {
       setOrders((prev) =>
         prev.map((o) => (o.id === detail.id ? { ...o, status } : o))
       );
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error);
-      toast.error(error?.message || "No se pudo actualizar el estado");
+      const message = error instanceof Error ? error.message : null;
+      toast.error(message || "No se pudo actualizar el estado");
     } finally {
       setUpdating(false);
     }
@@ -107,7 +159,7 @@ export default function AdminOrdersPage() {
 
   return (
     <main className="mx-auto max-w-7xl px-4 py-10 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <p className="text-sm font-semibold text-pizza-naranja uppercase tracking-wide">
             Admin
@@ -117,9 +169,83 @@ export default function AdminOrdersPage() {
           </h1>
           <p className="text-gray-600 text-sm">Gestiona estados y pagos.</p>
         </div>
-        <Button onClick={fetchOrders} disabled={loading}>
-          {loading ? "Actualizando..." : "Refrescar"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-44">
+              <SelectValue placeholder="Filtrar estado" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Todos</SelectItem>
+              {statusOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Dialog open={showArchived} onOpenChange={setShowArchived}>
+            <DialogTrigger asChild>
+              <Button variant="outline">Archivado</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-3xl">
+              <DialogHeader>
+                <DialogTitle>Órdenes archivadas</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-3">
+                <Select
+                  value={archivedFilter}
+                  onValueChange={setArchivedFilter}
+                >
+                  <SelectTrigger className="w-48">
+                    <SelectValue placeholder="Filtrar archivado" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="delivered">Entregada</SelectItem>
+                    <SelectItem value="cancelled">Cancelada</SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="max-h-[60vh] overflow-y-auto space-y-2 pr-1">
+                  {filteredArchivedOrders.length === 0 && (
+                    <p className="text-sm text-gray-500">
+                      No hay órdenes archivadas con este filtro.
+                    </p>
+                  )}
+                  {filteredArchivedOrders.map((order) => (
+                    <button
+                      key={order.id}
+                      className="w-full rounded-xl border border-gray-200 px-3 py-2 text-left hover:border-pizza-naranja transition-colors"
+                      onClick={() => {
+                        setSelectedId(order.id);
+                        setShowArchived(false);
+                      }}
+                    >
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-semibold text-pizza-texto">
+                          Orden #{order.id}
+                        </span>
+                        <Badge
+                          className={
+                            statusStyle[order.status] ||
+                            "bg-gray-100 text-gray-700"
+                          }
+                        >
+                          {order.status}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        Total: ${order.total}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+          <Button onClick={fetchOrders} disabled={loading}>
+            {loading ? "Actualizando..." : "Refrescar"}
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -127,10 +253,10 @@ export default function AdminOrdersPage() {
           <h2 className="font-semibold text-pizza-texto">Listado</h2>
           <div className="space-y-2 max-h-[70vh] overflow-y-auto pr-2">
             {loading && <p className="text-sm text-gray-500">Cargando...</p>}
-            {!loading && orders.length === 0 && (
+            {!loading && filteredActiveOrders.length === 0 && (
               <p className="text-sm text-gray-500">Sin órdenes.</p>
             )}
-            {orders.map((order) => (
+            {filteredActiveOrders.map((order) => (
               <button
                 key={order.id}
                 className={`w-full rounded-xl border px-3 py-2 text-left hover:border-pizza-naranja transition-colors ${
@@ -199,6 +325,13 @@ export default function AdminOrdersPage() {
                     </SelectContent>
                   </Select>
                 </div>
+              </div>
+
+              <div className="rounded-xl border border-gray-200 p-4 space-y-1 text-sm text-gray-700">
+                <p className="font-semibold text-pizza-texto">Cliente</p>
+                <p>Nombre: {detail.user?.name || "-"}</p>
+                <p>Correo: {detail.user?.email || "-"}</p>
+                {detail.user?.phone && <p>Teléfono: {detail.user.phone}</p>}
               </div>
 
               {detail.address && (

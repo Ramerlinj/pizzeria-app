@@ -70,6 +70,19 @@ export default function Header() {
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  {user?.role &&
+                    ["admin", "superadmin"].includes(user.role) && (
+                      <DropdownMenuItem asChild className="cursor-pointer">
+                        <Link href="/admin" className="flex items-center">
+                          <UserIcon className="mr-2 h-4 w-4" />
+                          <span>Ir al panel admin</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                  {user?.role &&
+                    ["admin", "superadmin"].includes(user.role) && (
+                      <DropdownMenuSeparator />
+                    )}
                   <DropdownMenuItem className="cursor-pointer">
                     <UserIcon className="mr-2 h-4 w-4" />
                     <span>Perfil</span>

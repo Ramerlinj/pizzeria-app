@@ -44,9 +44,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     try {
       const userData = await getMe();
       setUser(userData);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Error desconocido";
       // Only log error if it's not a 401 (Unauthorized) which is expected when token expires
-      if (error.message !== "No autorizado") {
+      if (message !== "No autorizado") {
         console.error("Error fetching user:", error);
       }
       removeToken();

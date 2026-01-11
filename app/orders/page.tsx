@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { getAuthHeaders } from "@/lib/auth-api";
@@ -39,7 +39,7 @@ export default function OrdersPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const fetchOrders = async () => {
+  const fetchOrders = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -60,17 +60,18 @@ export default function OrdersPage() {
         ? payload.orders
         : [];
       setOrders(list);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      setError(err.message || "Error cargando órdenes");
+      const message = err instanceof Error ? err.message : null;
+      setError(message || "Error cargando órdenes");
     } finally {
       setLoading(false);
     }
-  };
+  }, [router]);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [fetchOrders]);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-12 space-y-6">

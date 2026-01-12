@@ -17,24 +17,25 @@ export default function AboutPage() {
   return (
     <div className="flex flex-col min-h-screen">
       {/* Hero Section */}
-      <section className="relative h-[60vh] md:h-[80vh] flex items-center justify-center overflow-hidden">
+      <section className="relative h-[60vh] md:h-[80vh] flex items-center justify-center overflow-hidden bg-pizza-crema">
         <div className="absolute inset-0 z-0">
           <Image
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOfsdC4etN_u9JHa9kE5qOLLeCCkMfOwBytPK9ZQ_3BOkdfaz4loYifiZzMl601XD565xaEnxcpwCUEnoWDJ6MznYXTIy7byUCSKM4_cf3uPTWcuKJKoKxh-psYgEzpk-0SwmhmdRydjmNcv7zNRpu5Dj7gv1HAyUgsVPVL7Ng-KxUH2w0OAZnQJTZeSiqnPWy5fE_dqW8AUNL3hPMbDHxbfJB3C3-RGCHzyWIVtbgjHLC2zsWhz_X1UKFb6tuIM9LF21nEmlg5aw"
             alt="Horno de pizza tradicional"
             fill
-            className="object-cover brightness-[0.4]"
+            className="object-cover brightness-90"
             priority
           />
         </div>
-        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto text-white">
-          <span className="inline-block py-1 px-3 rounded-full bg-pizza-naranja text-xs font-bold tracking-wider mb-4 uppercase">
+        <div className="absolute inset-0 bg-gradient-to-b from-white/75 via-white/60 to-white/20" />
+        <div className="relative z-10 text-center px-4 max-w-4xl mx-auto text-gray-900">
+          <span className="inline-block py-1 px-3 rounded-full bg-pizza-naranja/15 text-pizza-naranja text-xs font-bold tracking-wider mb-4 uppercase">
             Est. 1998
           </span>
-          <h1 className="text-5xl md:text-7xl font-bold font-heading mb-6 leading-tight">
+          <h1 className="text-5xl md:text-7xl font-bold font-heading mb-6 leading-tight text-pizza-texto">
             Más Que Solo <span className="text-pizza-naranja">Pizza</span>
           </h1>
-          <p className="text-lg md:text-xl text-gray-200 mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
             Creamos experiencias, no solo comidas. Una rebanada de tradición
             napolitana servida con pasión moderna en cada bocado.
           </p>
@@ -47,7 +48,7 @@ export default function AboutPage() {
             <Link href="/contact">
               <Button
                 variant="outline"
-                className="bg-white/10 border-white/20 text-white hover:bg-white/20 rounded-full px-8 py-6 text-lg font-bold backdrop-blur-sm transition-all hover:scale-105"
+                className="bg-white border-pizza-naranja/30 text-pizza-texto hover:bg-pizza-naranja/10 rounded-full px-8 py-6 text-lg font-bold transition-all hover:scale-105"
               >
                 Nuestras Ubicaciones
               </Button>
@@ -57,13 +58,13 @@ export default function AboutPage() {
       </section>
 
       {/* Philosophy Section */}
-      <section className="py-20 bg-[#1a1a1a] text-white">
+      <section className="py-20 bg-gradient-to-b from-white via-pizza-crema/50 to-white text-pizza-texto">
         <div className="container px-4 mx-auto">
           <div className="mb-16 text-center md:text-left">
-            <h2 className="text-4xl md:text-5xl font-bold font-heading mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold font-heading mb-4 text-pizza-texto">
               Nuestra <span className="text-pizza-naranja">Filosofía</span>
             </h2>
-            <p className="text-gray-400 max-w-2xl">
+            <p className="text-gray-600 max-w-2xl">
               Desde la granja hasta el fuego, creemos en el poder de lo simple.
               Ingredientes de alta calidad obtenidos directamente de Italia. No
               cortamos esquinas; cortamos rebanadas.
@@ -72,42 +73,42 @@ export default function AboutPage() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {/* Card 1 */}
-            <div className="bg-white/5 p-8 rounded-3xl border border-white/10 hover:border-pizza-naranja/50 transition-all duration-300 group hover:-translate-y-1">
-              <div className="w-14 h-14 bg-pizza-naranja/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-pizza-naranja transition-colors duration-300">
+            <div className="bg-white p-8 rounded-3xl border border-pizza-naranja/15 hover:border-pizza-naranja/50 transition-all duration-300 group hover:-translate-y-1 shadow-sm">
+              <div className="w-14 h-14 bg-pizza-naranja/15 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-pizza-naranja transition-colors duration-300">
                 <Leaf className="w-7 h-7 text-pizza-naranja group-hover:text-white transition-colors" />
               </div>
               <h3 className="text-xl font-bold font-heading mb-3">
                 Ingredientes Frescos
               </h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-600 text-sm leading-relaxed">
                 Obtenemos diariamente ingredientes de mercados orgánicos locales
                 e importamos directamente desde Nápoles lo esencial.
               </p>
             </div>
 
             {/* Card 2 */}
-            <div className="bg-white/5 p-8 rounded-3xl border border-white/10 hover:border-pizza-naranja/50 transition-all duration-300 group hover:-translate-y-1">
-              <div className="w-14 h-14 bg-pizza-naranja/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-pizza-naranja transition-colors duration-300">
+            <div className="bg-white p-8 rounded-3xl border border-pizza-naranja/15 hover:border-pizza-naranja/50 transition-all duration-300 group hover:-translate-y-1 shadow-sm">
+              <div className="w-14 h-14 bg-pizza-naranja/15 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-pizza-naranja transition-colors duration-300">
                 <Flame className="w-7 h-7 text-pizza-naranja group-hover:text-white transition-colors" />
               </div>
               <h3 className="text-xl font-bold font-heading mb-3">
                 Horno de Leña
               </h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-600 text-sm leading-relaxed">
                 Cocinadas a 900°F en nuestros hornos Stefano Ferrara
                 personalizados para ese carbonizado de leopardo perfecto.
               </p>
             </div>
 
             {/* Card 3 */}
-            <div className="bg-white/5 p-8 rounded-3xl border border-white/10 hover:border-pizza-naranja/50 transition-all duration-300 group hover:-translate-y-1">
-              <div className="w-14 h-14 bg-pizza-naranja/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-pizza-naranja transition-colors duration-300">
+            <div className="bg-white p-8 rounded-3xl border border-pizza-naranja/15 hover:border-pizza-naranja/50 transition-all duration-300 group hover:-translate-y-1 shadow-sm">
+              <div className="w-14 h-14 bg-pizza-naranja/15 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-pizza-naranja transition-colors duration-300">
                 <Heart className="w-7 h-7 text-pizza-naranja group-hover:text-white transition-colors" />
               </div>
               <h3 className="text-xl font-bold font-heading mb-3">
                 Receta Familiar
               </h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
+              <p className="text-gray-600 text-sm leading-relaxed">
                 Masa fermentada durante 72 horas, transmitida a través de tres
                 generaciones de la familia Rossi.
               </p>
@@ -304,20 +305,21 @@ export default function AboutPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="relative py-32 flex items-center justify-center overflow-hidden">
+      <section className="relative py-32 flex items-center justify-center overflow-hidden bg-pizza-crema">
         <div className="absolute inset-0 z-0">
           <Image
             src="https://lh3.googleusercontent.com/aida-public/AB6AXuAT_9o6kQkenjE-M3golhwSR62EplmIWxw29qWtgELVyVQYYz8XFDP7M5K9QHMu9qZGMjQOA2RJn3ObZuFxccHpto--En-Th-F3TB-gTGT-MLKk5dGuG9pL7AjBchiRevp1KSG-LdqLNFrxC1urr8gDno_GVB6yaCia3RJVcCbeczBHyfxR0UteEi1wJouTZV6w5cVaA7jNU4KaVTg7l8Zxqm2qSkdwyVbcelB1N0f6w4IAsQjtYot27vgdSWWaaNR1hyvYuu91bg8"
             alt="Pizza deliciosa"
             fill
-            className="object-cover brightness-[0.3]"
+            className="object-cover brightness-90"
           />
         </div>
-        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto text-white">
+        <div className="absolute inset-0 bg-gradient-to-b from-white/80 via-white/70 to-white/30" />
+        <div className="relative z-10 text-center px-4 max-w-3xl mx-auto text-pizza-texto">
           <h2 className="text-4xl md:text-6xl font-bold font-heading mb-6">
             Prueba la Tradición
           </h2>
-          <p className="text-lg text-gray-300 mb-10 max-w-2xl mx-auto">
+          <p className="text-lg text-gray-700 mb-10 max-w-2xl mx-auto">
             ¿Listo para experimentar la mejor pizza napolitana de la ciudad?
             Reserva tu mesa ahora o pide a domicilio y disfruta en casa.
           </p>
@@ -327,7 +329,7 @@ export default function AboutPage() {
             </Button>
             <Button
               variant="outline"
-              className="bg-white text-gray-900 border-white hover:bg-gray-100 rounded-full px-8 py-6 text-lg font-bold transition-all hover:scale-105"
+              className="bg-white text-pizza-texto border-pizza-naranja/30 hover:bg-pizza-naranja/10 rounded-full px-8 py-6 text-lg font-bold transition-all hover:scale-105"
             >
               Pedir a Domicilio
             </Button>

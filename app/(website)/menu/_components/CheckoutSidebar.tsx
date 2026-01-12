@@ -666,7 +666,7 @@ export const CheckoutSidebar = () => {
       {orderSuccess && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-6">
           <div className="w-full max-w-xl rounded-3xl bg-white p-10 text-center shadow-2xl border border-pizza-naranja/20 relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-pizza-naranja/10 via-transparent to-pizza-naranja/5 pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-br from-pizza-naranja/10 via-transparent to-pizza-naranja/5 pointer-events-none" />
             <div className="relative">
               <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 text-green-600 shadow-inner">
                 <CheckCircle className="h-12 w-12" />

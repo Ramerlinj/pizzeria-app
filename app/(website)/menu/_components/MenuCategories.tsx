@@ -188,7 +188,7 @@ export const MenuCategories = () => {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-transparent" />
+                <div className="absolute inset-0 bg-linear-to-t from-black/65 via-black/20 to-transparent" />
                 <div className="absolute bottom-6 left-6 flex items-center gap-3 text-white drop-shadow-2xl">
                   <span className="text-4xl md:text-5xl font-heading font-bold">
                     ${selectedItem.price.toFixed(2)}
